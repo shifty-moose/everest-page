@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;500;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.4/TextPlugin.min.js"></script>
+    <script>
+    // Create the application helper and add its render target to the page
+    let app = new PIXI.Application({ width: 1450, height: 600, backgroundAlpha: 0, resizeTo: (window - 200) });
+    document.body.appendChild(app.view);
+
+
+
+    const listOfMountains = [
+        everest = {
+            name: 'everest',
+            height: '8,849m',
+
+            // x and y coordinates for the label
+            x: 200,
+            y: 70,
+
+            // x and y coordinates for the line to start
+            xStart: 0, 
+            yStart: 85,
+
+            // x and y coordinates for the line to end
+            xEnd: 210,
+            yEnd: 85,
+        },
+
+        anaconooga = {
+            name: 'anaconooga',
+            height: '6,961m',
+            x: 0,
+            y: 0,
+        },
+    ];
+
+    const createMountainLabel = item => {
+
+        //Finds the name of the mountain via texture name
+        let mountainName = item.texture.textureCacheIds[0]; 
+
+        // Removes any extras to highlight name
+        mountainName = mountainName.replace('Highlight.png', '');
+        mountainName = mountainName.replace('.png', ''); 
+
+        // Finds the mountain object in the array
+        mountain = listOfMountains.find(mountain => mountain.name === mountainName);
+        mountainName = mountain.name.replace(/\b\w/g, function(e) { return e.toUpperCase(); });
+
+        // Creates the label container
+        let labelContainer = new PIXI.Container();
+        labelContainer.x = mountain.x;
+        app.stage.addChild(labelContainer);
+
+        // Creates the label text
+        let mountainLabel = new PIXI.Text(mountainName + ' - ' + mountain.height, { 
+            fontFamily: 'Inter', 
+            fontWeight: 100,
+            fontSize: 24, 
+            fill: 'black', 
+            align: 'left',
+            stroke: 'black',
+            strokeThickness: 0.5,
+        });
+        mountainLabel.y = mountain.y;
+        labelContainer.addChild(mountainLabel);
+
+        // Creates the label line
+        let mountainLine = new PIXI.Graphics();
+        mountainLine.lineStyle(1, 'black', 1);
+        mountainLine.moveTo(mountain.xStart, mountain.yStart);
+        mountainLine.lineTo(mountain.xEnd, mountain.yEnd);
+        mountainLine.closePath();
+        mountainLine.scale.x = 0;
+        labelContainer.addChild(mountainLine);
+
+        gsap.to(mountainLine.scale, { x: 1, duration: 1 });
+        gsap.to(mountainLabel, { x: 220, duration: 1 }); // Adjust the x position to 220
+
+        }
+
+    const onMouseOver = item => {
+        item.isOver = true;
+        let selectedTexture = item.texture.textureCacheIds[0];
+        selectedTexture = selectedTexture.replace('.png', 'Highlight.png');
+        item.texture = PIXI.Texture.from(selectedTexture);
+
+
+    };
+
+    const onMouseOut = item => {
+        item.isOver = false;
+        let originalTexture = item.texture.textureCacheIds[0];
+        originalTexture = originalTexture.replace('Highlight', '');
+        item.texture = PIXI.Texture.from(originalTexture);
+
+    };
+
+
+    // EVEREST CODE
+
+    let mountainOneTexture = PIXI.Texture.from('everest.png');
+    let mountainOne = new PIXI.Sprite(mountainOneTexture);
+
+    // let mountainOneContainer = new PIXI.Container();
+    // mountainOneContainer.x = 200;
+    // app.stage.addChild(mountainOneContainer);
+
+    // let mountainOneLabel = new PIXI.Text('Everest - 8,849m', { 
+    //     fontFamily: 'Inter', 
+    //     fontWeight: 100,
+    //     fontSize: 24, 
+    //     fill: 'black', 
+    //     align: 'left',
+    //     stroke: 'black',
+    //     strokeThickness: 1,
+    // });
+    // mountainOneLabel.y = 70;
+    // mountainOneContainer.addChild(mountainOneLabel);
+
+    // let mountainOneLine = new PIXI.Graphics();
+    // mountainOneLine.lineStyle(1, 'black', 1);
+    // mountainOneLine.moveTo(0, 85);
+    // mountainOneLine.lineTo(210, 85);
+    // mountainOneLine.closePath();
+    // mountainOneLine.scale.x = 0;
+    // mountainOneContainer.addChild(mountainOneLine);
+
+    // gsap.to(mountainOneLine.scale, { x: 1, duration: 1 });
+    // gsap.to(mountainOneLabel, { x: 220, duration: 1 }); // Adjust the x position to 220
+
+    mountainOne.interactive = true;
+    mountainOne.on('pointerover', () => {
+                                    onMouseOver(mountainOne);
+                                    createMountainLabel(mountainOne);});
+    mountainOne.on('pointerout', () => onMouseOut(mountainOne));
+
+    mountainOne.hitArea = new PIXI.Polygon([ 
+        0, 180,
+
+        60, 100,
+
+        150, 60,
+
+        205, 0,
+
+        243, 40,
+
+        290, 117,
+
+        345, 190,
+
+        408, 205,
+
+        170, 357,
+
+        0, 500,
+    ]);
+    mountainOne.cursor = 'pointer';
+    mountainOne.eventMode = 'static';    
+
+    app.stage.addChild(mountainOne);    
+    
+    
+    // EVEREST CODE ENDS
+
+
+    let mountainTwoTexture = PIXI.Texture.from('anaconooga.png');
+    let mountainTwo = new PIXI.Sprite(mountainTwoTexture);
+
+    mountainTwo.interactive = true;
+    mountainTwo.on('pointerover', () => onMouseOver(mountainTwo));
+    mountainTwo.on('pointerout', () => onMouseOut(mountainTwo));
+    mountainTwo.hitArea = new PIXI.Polygon([ 
+        0, 498,
+
+        240, 306,
+
+        447, 190,
+
+        530, 184,
+
+        600, 225,
+
+        623, 255,
+
+        506, 334,
+
+        483, 334,
+
+        387, 378,
+
+        325, 438,
+
+        209, 480,
+
+        95, 500,
+
+        0, 514,
+    ]);
+    mountainTwo.cursor = 'pointer';
+    mountainTwo.eventMode = 'static';
+    
+    app.stage.addChild(mountainTwo);
+
+    let mountainThree = PIXI.Sprite.from('mckinley.png');
+        app.stage.addChild(mountainThree);
+
+    let mountainFour = PIXI.Sprite.from('kili.png');
+        app.stage.addChild(mountainFour);
+   
+    let mountainFive = PIXI.Sprite.from('elbrus.png');
+        app.stage.addChild(mountainFive);
+
+    let mountainSix = PIXI.Sprite.from('middlepeak.png');
+        app.stage.addChild(mountainSix);
+
+    let mountainSeven = PIXI.Sprite.from('rightpeak.png');
+        app.stage.addChild(mountainSeven);
+    
+    let mountainEight = PIXI.Sprite.from('kozky.png');
+        app.stage.addChild(mountainEight);
+
+    let mountainNine = PIXI.Sprite.from('fuji.png');
+        app.stage.addChild(mountainNine);
+
+
+    let mountainTen = PIXI.Sprite.from('buller.png');
+        app.stage.addChild(mountainTen);
+
+    let mountainEleven = PIXI.Sprite.from('bennevis.png');
+        app.stage.addChild(mountainEleven);
+
+    let mountainTwelve = PIXI.Sprite.from('christo.png');
+        app.stage.addChild(mountainTwelve);
+
+    let mountainThirteen = PIXI.Sprite.from('holland.png');
+        app.stage.addChild(mountainThirteen);
+
+      
+
+
+      // Add a ticker callback to move the sprite back and forth
+    //   let elapsed = 0.0;
+    //   app.ticker.add((delta) => {
+    //     elapsed += delta;
+    //     sprite.x = 100.0 + Math.cos(elapsed/50.0) * 100.0;
+    //   });
+    </script>
+  </body>
+</html>
