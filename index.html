@@ -5,43 +5,154 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;500;700&display=swap" rel="stylesheet">
-  </head>
+    <style>
+        body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          border: 2px solid cyan;
+        }
+        canvas {
+          display: flex;
+          width: 90%;
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          border: 2px solid red;
+        }
+      </style>
+</head>
   <body>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.4/TextPlugin.min.js"></script>
     <script>
     // Create the application helper and add its render target to the page
-    let app = new PIXI.Application({ width: 1450, height: 600, backgroundAlpha: 0, resizeTo: (window - 200) });
+    let app = new PIXI.Application({ 
+        width: 1850, 
+        height: 600, 
+        backgroundAlpha: 0,
+
+    });
+
     document.body.appendChild(app.view);
-
-
 
     const listOfMountains = [
         everest = {
             name: 'everest',
             height: '8,849m',
 
-            // x and y coordinates for the label
-            x: 200,
+            // x and y coordinates for the label position
+            x: 270,
             y: 70,
 
-            // x and y coordinates for the line to start
+
+            // x horizontal position for final position of the label text
+            xLabel: 220,
+
+            // x and y coordinates for the horizontal line to start
             xStart: 0, 
             yStart: 85,
 
-            // x and y coordinates for the line to end
-            xEnd: 210,
+            // x and y coordinates for the horizontal line to end
+            xEnd: 200,
             yEnd: 85,
+
+            // x and y coordinates for the vetical line to start
+            xVerticalStart: null,
+            yVerticalStart: null,
+
+            // x and y coordinates for the vetical line to end
+            xVerticalEnd: null,
+            yVerticalEnd: null,
         },
 
         anaconooga = {
             name: 'anaconooga',
             height: '6,961m',
-            x: 0,
-            y: 0,
+
+            // x and y coordinates for the label
+            x: 490,
+            y: 88,
+
+            // x for final position of the label text
+            xLabel: 190,
+
+            // x and y coordinates for the horizontal line to start
+            xStart: 30,
+            yStart: 105,
+
+            // x and y coordinates for the horizontal line to end
+            xEnd: 170,
+            yEnd: 105,
+
+            // x and y coordinates for the vetical line to start
+            xVerticalStart: 30,
+            yVerticalStart: 192,
+
+            // x and y coordinates for the vetical line to end
+            xVerticalEnd: 30,
+            yVerticalEnd: 105,
+        },
+ 
+        mckinley = {
+            name: 'mckinley',
+            height: '6,194m',
+
+            // x and y coordinates for the label
+            x: 755,
+            y: 150,
+
+            // x for final position of the label text
+            xLabel: 120,
+
+            // x and y coordinates for the horizontal line to start
+            xStart: 30,
+            yStart: 168,
+
+            // x and y coordinates for the horizontal line to end
+            xEnd: 100,
+            yEnd: 168,
+
+            // x and y coordinates for the vetical line to start
+            xVerticalStart: 30,
+            yVerticalStart: 250,
+
+            // x and y coordinates for the vetical line to end
+            xVerticalEnd: 30,
+            yVerticalEnd: 168,
+        },
+
+        kilimanjaro = {
+            name: 'kilimanjaro',
+            height: '5,895m',
+
+            // x and y coordinates for the label
+            x: 1050,
+            y: 150,
+
+            // x for final position of the label text
+            xLabel: -240,
+
+            // x and y coordinates for the horizontal line to start
+            xStart: -5,
+            yStart: 168,
+
+            // x and y coordinates for the horizontal line to end
+            xEnd: 30,
+            yEnd: 168,
+
+            // x and y coordinates for the vetical line to start
+            xVerticalStart: 30,
+            yVerticalStart: 168,
+
+            // x and y coordinates for the vetical line to end
+            xVerticalEnd: 30,
+            yVerticalEnd: 300,
         },
     ];
+
+    let labelContainer;
 
     const createMountainLabel = item => {
 
@@ -57,9 +168,28 @@
         mountainName = mountain.name.replace(/\b\w/g, function(e) { return e.toUpperCase(); });
 
         // Creates the label container
-        let labelContainer = new PIXI.Container();
+        labelContainer = new PIXI.Container();
+        
         labelContainer.x = mountain.x;
         app.stage.addChild(labelContainer);
+
+        // Creating an extra line (OR THE VERTICAL LINE) if needed
+        if (mountain.xVerticalStart != null) {
+            let extraLine = new PIXI.Graphics();
+            extraLine.lineStyle(1, 'black', 1); 
+            extraLine.moveTo(mountain.xVerticalStart, mountain.yVerticalEnd); // Start from the bottom
+            extraLine.lineTo(mountain.xVerticalEnd, mountain.yVerticalStart); // End at the top
+            extraLine.closePath();
+            labelContainer.addChild(extraLine);
+
+            // Set the pivot point to the bottom of the line
+            extraLine.pivot.y = mountain.yVerticalEnd;
+            extraLine.position.y = mountain.yVerticalEnd;
+
+            // Animate the line to appear from bottom to top
+            extraLine.scale.y = 0;
+            gsap.to(extraLine.scale, { y: 1, duration: 0.5 });
+        }
 
         // Creates the label text
         let mountainLabel = new PIXI.Text(mountainName + ' - ' + mountain.height, { 
@@ -70,8 +200,9 @@
             align: 'left',
             stroke: 'black',
             strokeThickness: 0.5,
-        });
+        }); 
         mountainLabel.y = mountain.y;
+
         labelContainer.addChild(mountainLabel);
 
         // Creates the label line
@@ -83,10 +214,11 @@
         mountainLine.scale.x = 0;
         labelContainer.addChild(mountainLine);
 
-        gsap.to(mountainLine.scale, { x: 1, duration: 1 });
-        gsap.to(mountainLabel, { x: 220, duration: 1 }); // Adjust the x position to 220
-
+        // Animate the line to appear from left to right
+        gsap.to(mountainLine.scale, { x: 1, duration: 0.5, delay: 0.4 });
+        gsap.to(mountainLabel, { x: mountain.xLabel, duration: 0.8 }); 
         }
+
 
     const onMouseOver = item => {
         item.isOver = true;
@@ -102,48 +234,21 @@
         let originalTexture = item.texture.textureCacheIds[0];
         originalTexture = originalTexture.replace('Highlight', '');
         item.texture = PIXI.Texture.from(originalTexture);
-
+        app.stage.removeChild(labelContainer);
     };
 
 
     // EVEREST CODE
-
     let mountainOneTexture = PIXI.Texture.from('everest.png');
     let mountainOne = new PIXI.Sprite(mountainOneTexture);
-
-    // let mountainOneContainer = new PIXI.Container();
-    // mountainOneContainer.x = 200;
-    // app.stage.addChild(mountainOneContainer);
-
-    // let mountainOneLabel = new PIXI.Text('Everest - 8,849m', { 
-    //     fontFamily: 'Inter', 
-    //     fontWeight: 100,
-    //     fontSize: 24, 
-    //     fill: 'black', 
-    //     align: 'left',
-    //     stroke: 'black',
-    //     strokeThickness: 1,
-    // });
-    // mountainOneLabel.y = 70;
-    // mountainOneContainer.addChild(mountainOneLabel);
-
-    // let mountainOneLine = new PIXI.Graphics();
-    // mountainOneLine.lineStyle(1, 'black', 1);
-    // mountainOneLine.moveTo(0, 85);
-    // mountainOneLine.lineTo(210, 85);
-    // mountainOneLine.closePath();
-    // mountainOneLine.scale.x = 0;
-    // mountainOneContainer.addChild(mountainOneLine);
-
-    // gsap.to(mountainOneLine.scale, { x: 1, duration: 1 });
-    // gsap.to(mountainOneLabel, { x: 220, duration: 1 }); // Adjust the x position to 220
 
     mountainOne.interactive = true;
     mountainOne.on('pointerover', () => {
                                     onMouseOver(mountainOne);
                                     createMountainLabel(mountainOne);});
-    mountainOne.on('pointerout', () => onMouseOut(mountainOne));
-
+    mountainOne.on('pointerout', () => {
+                                    onMouseOut(mountainOne);
+                                    });
     mountainOne.hitArea = new PIXI.Polygon([ 
         0, 180,
 
@@ -167,18 +272,18 @@
     ]);
     mountainOne.cursor = 'pointer';
     mountainOne.eventMode = 'static';    
-
+    
     app.stage.addChild(mountainOne);    
     
     
-    // EVEREST CODE ENDS
-
-
+    // ANACONOOGA CODE
     let mountainTwoTexture = PIXI.Texture.from('anaconooga.png');
     let mountainTwo = new PIXI.Sprite(mountainTwoTexture);
 
     mountainTwo.interactive = true;
-    mountainTwo.on('pointerover', () => onMouseOver(mountainTwo));
+    mountainTwo.on('pointerover', () => {
+                                    onMouseOver(mountainTwo);
+                                    createMountainLabel(mountainTwo);});
     mountainTwo.on('pointerout', () => onMouseOut(mountainTwo));
     mountainTwo.hitArea = new PIXI.Polygon([ 
         0, 498,
@@ -212,20 +317,136 @@
     
     app.stage.addChild(mountainTwo);
 
-    let mountainThree = PIXI.Sprite.from('mckinley.png');
-        app.stage.addChild(mountainThree);
 
-    let mountainFour = PIXI.Sprite.from('kili.png');
-        app.stage.addChild(mountainFour);
+
+    // MCKINLEY CODE
+    let mountainThreeTexture = PIXI.Texture.from('mckinley.png');
+    let mountainThree = new PIXI.Sprite(mountainThreeTexture);
+
+    mountainThree.interactive = true;
+    mountainThree.on('pointerover', () => {
+                                    onMouseOver(mountainThree);
+                                    createMountainLabel(mountainThree);});
+    mountainThree.on('pointerout', () => onMouseOut(mountainThree));
+    mountainThree.hitArea = new PIXI.Polygon([
+        326, 430,
+
+        390, 374, 
+
+        505, 328,
+
+        542, 300,
+
+        560, 275,
+
+        602, 265,
+
+        625, 250,
+
+        650, 246,
+
+        680, 262,
+
+        794, 255,
+
+        831, 274,
+
+        860, 270,
+
+        935, 313,
+
+        887, 333,
+
+        870, 350,
+
+        763, 382,
+
+        581, 400,
+
+        536, 394,
+
+        490, 365,
+
+        424, 404,
+
+    ])
+    mountainThree.cursor = 'pointer';
+    mountainThree.eventMode = 'static';
+
+    app.stage.addChild(mountainThree);
+
+
+    // KILIMANJARO CODE
+    let mountainFourTexture = PIXI.Texture.from('kilimanjaro.png');
+    let mountainFour = new PIXI.Sprite(mountainFourTexture);
+
+    mountainFour.interactive = true;
+    mountainFour.on('pointerover', () => {
+                                    onMouseOver(mountainFour);
+                                    createMountainLabel(mountainFour);});
+    mountainFour.on('pointerout', () => onMouseOut(mountainFour));
+    mountainFour.hitArea = new PIXI.Polygon([
+        0, 513,
+
+        210, 480,
+
+        488, 380,
+
+        526, 405,
+
+        756, 395,
+
+        870, 360,
+
+        964, 307,
+
+        1105, 300,
+
+        1195, 360,
+
+        1141, 392,
+
+        1107, 450,
+
+        1107, 480,
+
+        1070, 475,
+
+        1045, 508,
+
+        957, 531,
+
+        930, 512,
+
+        900, 534,
+
+        764, 527,
+
+        636, 526,
+
+        590, 551,
+
+        448, 570,
+
+        365, 600,
+
+        0, 600,
+    ])
+    mountainFour.cursor = 'pointer';
+    mountainFour.eventMode = 'static';
+    
+    app.stage.addChild(mountainFour);
    
+    // ELBRUS CODE
     let mountainFive = PIXI.Sprite.from('elbrus.png');
         app.stage.addChild(mountainFive);
 
+    // VINSON CODE
     let mountainSix = PIXI.Sprite.from('middlepeak.png');
         app.stage.addChild(mountainSix);
 
     let mountainSeven = PIXI.Sprite.from('rightpeak.png');
-        app.stage.addChild(mountainSeven);
+    app.stage.addChild(mountainSeven);
     
     let mountainEight = PIXI.Sprite.from('kozky.png');
         app.stage.addChild(mountainEight);
@@ -246,15 +467,6 @@
     let mountainThirteen = PIXI.Sprite.from('holland.png');
         app.stage.addChild(mountainThirteen);
 
-      
-
-
-      // Add a ticker callback to move the sprite back and forth
-    //   let elapsed = 0.0;
-    //   app.ticker.add((delta) => {
-    //     elapsed += delta;
-    //     sprite.x = 100.0 + Math.cos(elapsed/50.0) * 100.0;
-    //   });
     </script>
   </body>
 </html>
